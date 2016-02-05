@@ -12,22 +12,22 @@ var addNewUserToDatabase = function(user, callback) {
   // (1) See if the user already exists
   db.findUserInDatabase(user, function(err, existingUser) {
     if (err) {
-      callback(err, null)
+      callback(err, null);
     } else if (existingUser) {
-      callback('User already exists!', null)
+      callback('User already exists!', null);
     } else {
       // (2) then, secure the user by hashing the pw
       db.hashPassword(user, function(err, securedUser) {
         if (err) {
-          callback(err, null)
+          callback(err, null);
         } else {
           // (3) then, create and save the new secured user
           db.createAndSaveUser(securedUser, function(err, savedUser) {
             if (err) {
-              callback(err, null)
+              callback(err, null);
             } else {
               // (4) We're finally done! Pass our new saved user along
-              callback(null, savedUser)
+              callback(null, savedUser);
             }
           });
         }
@@ -55,7 +55,7 @@ var addNewUserToDatabase = function(user, callback) {
 
 // Chaining lets us get rid of the entire pyramid of doom!!
 
-Promise.promisifyAll(db)
+Promise.promisifyAll(db);
 
 var addNewUserToDatabaseAsync = function(user) {
   // The outermost `return` lets us continue the chain
@@ -63,30 +63,30 @@ var addNewUserToDatabaseAsync = function(user) {
   return db.findUserInDatabaseAsync(user)
     .then(function(existingUser) {
       if (existingUser) {
-        throw new Error('User already exists!') // Head straight to `catch`. Do not pass Go, do not collect $200
+        throw new Error('User already exists!'); // Head straight to `catch`. Do not pass Go, do not collect $200
       } else {
         return user; // Return a syncronous value
       }
     })
     .then(function(newUser) {
-      return db.hashPasswordAsync(newUser) // Return a promise
+      return db.hashPasswordAsync(newUser); // Return a promise
     })
     .then(function(securedUser) {
-      return db.createAndSaveUserAsync(securedUser) // Return another promise
-    })
-}
+      return db.createAndSaveUserAsync(securedUser); // Return another promise
+    });
+};
 
 // Uncomment the lines below and run the example with `node exercises/bare_minimum/chaining.js`
 // It will succeed most of the time, but fail occasionally to demonstrate error handling
 
-// addNewUserToDatabaseAsync({ name: 'Dan', password: 'chickennuggets' })
-//   .then(function(savedUser) {
-//     console.log('All done!')
-//   })
-//   .catch(function(err) {
-//     // Will catch any promise rejections or thrown errors in the chain!
-//     console.log('Oops, caught an error: ', err.message)
-//   });
+addNewUserToDatabaseAsync({ name: 'Dan', password: 'chickennuggets' })
+  .then(function(savedUser) {
+    console.log('All done!');
+  })
+  .catch(function(err) {
+    // Will catch any promise rejections or thrown errors in the chain!
+     console.log('Oops, caught an error: ', err.message);
+  });
 
 /******************************************************************
  *                         Exercises                              *
@@ -100,14 +100,20 @@ var addNewUserToDatabaseAsync = function(user) {
 
 // HINT: We already wrote some similar promise returning functions
 var pluckFirstLineFromFileAsync = require('./promiseConstructor').pluckFirstLineFromFileAsync;
-var getGitHubProfileAsync = require('./promisification').getGitHubProfileAsync
-
+var getGitHubProfileAsync = require('./promisification').getGitHubProfileAsync;
+var writeFileAsync = Promise.promisify(fs.writeFile);
 
 
 var fetchProfileAndWriteToFile = function(readFilePath, writeFilePath) {
-  // TODO
+  return pluckFirstLineFromFileAsync(readFilePath)
+  .then(function(user) {
+    return getGitHubProfileAsync(user);
+  })
+  .then(function(file) {
+    return writeFileAsync(writeFilePath, JSON.stringify(file));
+  });
 };
 
 module.exports = {
   fetchProfileAndWriteToFile: fetchProfileAndWriteToFile
-}
+};

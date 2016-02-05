@@ -279,7 +279,7 @@ describe('Bare Minimum', function() {
             });
             done();
           })
-          .catch(done)
+          .catch(done);
       });
 
       it('should make any errors available in the `catch` block', function (done) {
