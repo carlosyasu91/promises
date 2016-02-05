@@ -14,8 +14,8 @@ var Promise = require('bluebird');
 
 // All of the work done in promiseConstructor.js can be done in these three lines:
 var nodeStyle = require('./callbackReview.js');
-var pluckFirstLineFromFileAsync = Promise.promisify(nodeStyle.pluckFirstLineFromFile)
-var getStatusCodeAsync = Promise.promisify(nodeStyle.getStatusCode)
+var pluckFirstLineFromFileAsync = Promise.promisify(nodeStyle.pluckFirstLineFromFile);
+var getStatusCodeAsync = Promise.promisify(nodeStyle.getStatusCode);
 
 // Assuming all functions in a library precisely follow the node style callback pattern,
 // you can even promisify an entire library!
@@ -60,7 +60,7 @@ var getGitHubProfile = function (user, callback) {
  });
 };
 
-var getGitHubProfileAsync; // TODO
+var getGitHubProfileAsync = Promise.promisify(getGitHubProfile); // TODO
 
 
 // (2) Asyncronous token generation
@@ -71,25 +71,29 @@ var generateRandomToken = function (callback) {
  });
 };
 
-var generateRandomTokenAsync; // TODO
+var generateRandomTokenAsync = Promise.promisify(generateRandomToken);
 
 
 // (3) Asyncronous file manipulation
-var readFileAndMakeItFunny = function (filePath, callback) {
- fs.readFile(filePath, 'utf8', function(err, file) {
-   if (err) return callback(err);
-   
-   var funnyFile = file.split('\n')
-     .map(function(line) {
-       return line + ' lol';
-     })
-     .join('\n')
+var readFileAndMakeItFunny = function (filePath) {
+  return new Promise(function(resolve, reject) {
+    fs.readFile(filePath, 'utf8', function(err, file) {
+      if (err) {
+        return reject(err);
+      } else {
+        var funnyFile = file.split('\n')
+         .map(function(line) {
+           return line + ' lol';
+         })
+         .join('\n');
+        resolve(funnyFile);
+      }
+     });
+  });
 
-   callback(funnyFile);
- });
 };
 
-var readFileAndMakeItFunnyAsync; // TODO
+var readFileAndMakeItFunnyAsync = readFileAndMakeItFunny; // TODO
 
 // Export these functions so we can unit test them
 // and reuse them in later code ;)
